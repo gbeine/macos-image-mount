@@ -5,7 +5,7 @@
 First, make `ImageMount` operate on your user's home directory, then copy it to `/usr/local`
 
 ```
-sed -i -e "s;<<user>>;$HOME;" ImageMount
+sed -i '' -e "s#<<user>>#${HOME}#" ImageMount
 cp ImageMount /usr/local/bin
 ```
 
