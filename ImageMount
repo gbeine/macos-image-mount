@@ -1,0 +1,59 @@
+#!/bin/sh
+
+IMG_DIR=<<user>>/.images
+IMG_CONF=${IMG_DIR}/images.conf
+IMG_OPTIONS="-notremovable -nobrowse -owners on"
+
+Start()
+{
+	/usr/bin/hdiutil attach "${1}" -mountpoint "${2}" ${IMG_OPTIONS}
+}
+
+Stop()
+{
+	/usr/bin/hdiutil detach "${1}"
+}
+
+Run()
+{
+
+	case $1 in
+		start|stop|restart)
+			;;
+		*)
+			echo "$0: unknown argument: $1"
+			exit
+			;;
+	esac
+
+	while read -r conf
+	do
+		image=${conf%%,*}
+		conf=${conf#${image},}
+		mount_dir=${conf%%,*}
+		image=${IMG_DIR}/${image}
+		case $1 in
+			start)
+				Start "$image" "$mount_dir"
+				;;
+			stop)
+				Stop "$mount_dir"
+				;;
+			restart)
+				Stop "$mount_dir"
+				Start "$image $mount_dir"
+				;;
+		esac
+	done < "${IMG_CONF}"
+}
+
+case $2 in
+	removeable)
+		IMG_OPTIONS="-nobrowse -owners on"
+		;;
+	*)
+		IMG_OPTIONS="-notremovable -nobrowse -owners on"
+		;;
+esac
+
+Run $1
